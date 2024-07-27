@@ -1,5 +1,5 @@
 {
-  "data_dir": "data-w-camera",
+  "data_dir": "data",
   "resnet_checkpoint": "resnet18-f37072fd.pth",
   "data_portion": 0.2,
   "episode_length": 200,
@@ -18,7 +18,7 @@
   "transformer": {
     "num_encoder_layers": 3,
     "num_decoder_layers": 3,
-    "nhead": 10,
+    "nhead": 5,
     "dim_feedforward": 128
   },
   "mamba": {

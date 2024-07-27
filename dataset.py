@@ -28,16 +28,6 @@ class FrankaDataset(Dataset):
         self.stride = stride
         self.prediction_distance = prediction_distance
         self.map_location = torch.device("cpu") if limited_gpu_memory else None
-        self.image_preprocess = transforms.Compose(
-            [
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ConvertImageDtype(torch.float),
-                transforms.Normalize(
-                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                ),
-            ]
-        )
 
         with open(os.path.join(self.data_dir, "metadata.json"), "r") as f:
             self.metadata = json.load(f)
@@ -69,29 +59,12 @@ class FrankaDataset(Dataset):
             )
             self.curr_file_idx = file_idx
 
-        sensor_data: torch.Tensor = self.curr_file_data["sensor_data"][
-            step_idx : step_idx + self.window_size + self.prediction_distance, env_idx
-        ]
-        camera_data: torch.Tensor = self.curr_file_data["camera_data"][
+        data: torch.Tensor = self.curr_file_data[
             step_idx : step_idx + self.window_size + self.prediction_distance, env_idx
         ]
 
-        # remove alpha channel
-        camera_data = camera_data[..., :3]
-        # bring channel dim to front of image dims
-        camera_data = camera_data.permute(0, 1, 4, 2, 3)
-        # transforms
-        camera_data = self.image_preprocess(camera_data)
+        return data
 
-        if self.map_location is not None:
-            # manually move data to GPU
-            sensor_data = sensor_data.cuda()
-            camera_data = camera_data.cuda()
-
-        return {
-            "sensor_data": sensor_data,
-            "camera_data": camera_data,
-        }
 
     def __len__(self):
         return len(self.index_map)

@@ -60,8 +60,7 @@ def main():
         limited_gpu_memory=True,
     )
 
-    # [num of sensor features] + [resnet_featues * 3] (3 images)
-    data_dim = data_module.get_num_sensor_features() + (3 * params["resnet_features"])
+    data_dim = data_module.get_num_sensor_features()
 
     common_params = {
         "name": args.model,

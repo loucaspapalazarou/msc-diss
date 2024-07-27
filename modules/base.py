@@ -1,7 +1,6 @@
 from lightning.pytorch import LightningModule
 import torch
 from torch import nn
-from modules.resnet import ResNetBlock
 import torch.nn.functional as F
 
 
@@ -20,9 +19,6 @@ class BaseModelModule(LightningModule):
     ):
         super().__init__()
         self.save_hyperparameters()
-        self.resnet = ResNetBlock(
-            out_features_per_image=resnet_features, resnet_checkpoint=resnet_checkpoint
-        )
         self.name = name
         self.d_model = d_model
         self.start_lr = start_lr
@@ -35,20 +31,11 @@ class BaseModelModule(LightningModule):
             0 <= idx < self.d_model for idx in target_feature_indices
         ), "All target feature indices must be valid indices within d_model."
 
-    def combine_sensor_and_camera_data(self, sensor_data, camera_data):
-        resnet_features = self.resnet(camera_data)
-        combined_data = torch.cat((sensor_data, resnet_features), dim=2)
-        return combined_data
-
     def shared_step(self, batch, batch_idx, stage):
-        sensor_data = batch["sensor_data"]
-        camera_data = batch["camera_data"]
+        batch_size, seq_len, input_size = batch.size()
 
-        combined_data = self.combine_sensor_and_camera_data(sensor_data, camera_data)
-        batch_size, seq_len, input_size = combined_data.size()
-
-        src = combined_data[:, : self.window_size]
-        tgt = combined_data[:, -self.window_size :]
+        src = batch[:, : self.window_size]
+        tgt = batch[:, -self.window_size :]
 
         output = self.forward(src, tgt)
 
