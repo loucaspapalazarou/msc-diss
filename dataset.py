@@ -65,7 +65,6 @@ class FrankaDataset(Dataset):
 
         return data
 
-
     def __len__(self):
         return len(self.index_map)
 
@@ -108,7 +107,7 @@ class FrankaDataModule(LightningDataModule):
         )
         data_points = int(len(dataset) * self.data_portion)
         print(
-            f"Using {int(self.data_portion*100)}% ({data_points}/{len(dataset)}) of the data. Episode length: {self.epidsode_length}"
+            f"Using {int(self.data_portion*100)}% of the data ({data_points}/{len(dataset)} samples). Episode length: {self.epidsode_length}"
         )
         dataset = Subset(dataset, range(data_points))
         self.train_dataset, self.val_dataset = random_split(dataset, [0.8, 0.2])
